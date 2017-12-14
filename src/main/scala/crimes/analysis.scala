@@ -81,7 +81,7 @@ object Chicago extends JFXApp {
                     .drop("udfArray")
 
 
-  val notNullCrimes = crimes.filter('Latitude.isNotNull && 'Longitude.isNotNull && 'Latitude > 40)
+  val notNullCrimes = crimes.filter('Latitude.isNotNull && 'Longitude.isNotNull && 'Latitude > 40 && 'District.isNotNull)
 
 
 
@@ -90,18 +90,19 @@ object Chicago extends JFXApp {
 
     val long = notNullCrimes.select('Longitude).collect().map(_.getString(0).toDouble)
 
-    Plot.scatterPlot(lat,long,title,"Latitude","Longitude",size,RedARGB)
+    Plot.scatterPlot(long,lat,title,"Latitude","Longitude",size,RedARGB)
   }
 
+
   // val prostitution = notNullCrimes.filter('FBICode === "16")
-  // FXRenderer(plotCrimeLatLong(prostitution,"Prostitution in Chicago 2012 to 2017",3))
+  // FXRenderer(plotCrimeLatLong(prostitution,"Prostitution in Chicago 2001 to 2017",3))
   //
   // val robbery = notNullCrimes.filter('FBICode === "03")
-  // FXRenderer(plotCrimeLatLong(robbery,"Robbery in Chicago 2012 to 2017",2))
+  // FXRenderer(plotCrimeLatLong(robbery,"Robbery in Chicago 2001 to 2017",2))
   //
   // val homicide = notNullCrimes.filter('FBICode === "01A")
   // homicide.show()
-  // FXRenderer(plotCrimeLatLong(homicide,"Homicide in Chicago 2012 to 2017",4))
+  // FXRenderer(plotCrimeLatLong(homicide,"Homicide in Chicago 2001 to 2017",4))
   //
   // val all3 = notNullCrimes.filter('FBICode === "01A" || 'FBICode === "03" || 'FBICode == "16")
   // val cg = ColorGradient(1.0 -> RedARGB, 3.0 -> GreenARGB, 16.0 -> BlackARGB)
@@ -169,18 +170,21 @@ object Chicago extends JFXApp {
   // val notArrested = notNullCrimes.filter('Arrest === "False")
   // println("Arrested: " + arrested.count())
   // println("Not arrested: " + notArrested.count())
-
+  //
   // val arrestedGroups = arrested.groupBy('FBICode).agg(count('Year).as("Count")).orderBy(-'Count)
   // arrestedGroups.show(false)
   // val notArrestedGroups = notArrested.groupBy('FBICode).agg(count('Year).as("Count")).orderBy(-'Count)
   // notArrestedGroups.show(false)
-  //
+  // //
+  // val top5 = "Larcent,Simple Battery,Vandalism,Drug Abuse,Misc Non-Index Offense".split(",")
   // val arrestedToPlot = arrestedGroups.collect().map(row => fbiFlipped(row.getString(0)) -> row.getLong(1).toDouble)
-  // val barArrested = Plot.barPlot(arrestedToPlot.map(_._1.slice(0,10)).toSeq,Seq(arrestedToPlot.map(_._2).toSeq->RedARGB),false,0.8,"Number of Arrests Made by Crime Type","Crime Type","Number of Arrests")
+  //   .filter(x => top5.contains(x._1))
+  // val barArrested = Plot.barPlot(arrestedToPlot.map(_._1).toSeq,Seq(arrestedToPlot.map(_._2).toSeq->RedARGB),false,0.8,"Number of Arrests Made by Crime Type","Crime Type","Number of Arrests")
   // FXRenderer(barArrested)
   //
   // val notArrestedToPlot = notArrestedGroups.collect().map(row => fbiFlipped(row.getString(0)) -> row.getLong(1).toDouble)
-  // val barNotArrested = Plot.barPlot(notArrestedToPlot.map(_._1.slice(0,10)).toSeq,Seq(arrestedToPlot.map(_._2).toSeq->RedARGB),false,0.8,"Number of No Arrests Made by Crime Type","Crime Type","Number of No Arrests")
+  //   .filter(x => top5.contains(x._1))
+  // val barNotArrested = Plot.barPlot(notArrestedToPlot.map(_._1).toSeq,Seq(arrestedToPlot.map(_._2).toSeq->RedARGB),false,0.8,"Number of No Arrests Made by Crime Type","Crime Type","Number of No Arrests")
   // FXRenderer(barNotArrested)
 
   //Recommend how many crimes will occur on a given day in a given area(District?)
@@ -208,7 +212,17 @@ object Chicago extends JFXApp {
   // FXRenderer(plot)
   //TODO: Cluster prostitution data
 
-  println(notNullCrimes.select('FBICode).distinct.count())
+  // println(notNullCrimes.select('FBICode).distinct.count())
+  // notNullCrimes.groupBy('FBICode).agg(count('Year).as("Count")).collect().map(row => {
+  //   (fbiFlipped(row.getString(0)) -> row.getLong(1))
+  // }).sortBy(-_._2)foreach(println)
+
+  val lat = notNullCrimes.filter('FBICode === "03").select('Latitude).collect().map(_.getString(0).toDouble)
+
+  val long = notNullCrimes.filter('FBICode === "03").select('Longitude).collect().map(_.getString(0).toDouble)
+  val districts = notNullCrimes.filter('FBICode === "03").select('District).collect().map(_.getString(0).toDouble)
+  val cgB = ColorGradient(0.0 -> RedARGB, 11.0 -> GreenARGB, 22.0 -> BlueARGB)
+  FXRenderer(Plot.scatterPlot(long,lat,"Robberies and Their Police District","Latitude","Longitude",.2,districts.map(cgB)))
 
 
   //Better predictor

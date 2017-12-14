@@ -65,11 +65,17 @@ object DeepLearnCrime extends App {
     "Misc Non-Index Offense" -> "26"
   )
 
+
+
   val file1 = "crimes-in-chicago/Chicago_Crimes_2001_to_2004.csv"
   val file2 = "crimes-in-chicago/Chicago_Crimes_2005_to_2007.csv"
   val file3 = "crimes-in-chicago/Chicago_Crimes_2008_to_2011.csv"
   val file4 = "crimes-in-chicago/Chicago_Crimes_2012_to_2017.csv"
-  val fbiMap = fbiCodes.map(_._2).zipWithIndex.toMap
+  val fbiToKeepArr = "Larceny,Simple Battery,Vandalism,Drug Abuse".split(",")
+  val fbiMap = fbiCodes.filter(x => fbiToKeepArr.contains(x._1)).map(_._2).zipWithIndex.toMap
+  val fbiToKeep = fbiToKeepArr.map(str => {
+          fbiCodes(str)
+        })
   val headerMap = Source.fromFile(file1).getLines.next().split(',').zipWithIndex.toMap
   val colsToKeep = "LocationDescription Beat District Ward CommunityArea FBICode XCoordinate YCoordinate Year".split(" ")
   val colsMap = colsToKeep.zipWithIndex.toMap
@@ -77,7 +83,7 @@ object DeepLearnCrime extends App {
 
   def handleLine(line:String):String = {
     val arrayData = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)")
-    if(arrayData.contains("")) {
+    if(arrayData.contains("") || !fbiToKeep.contains(arrayData(headerMap("FBICode")))) {
       ""
     } else {
       val str:String = colsToKeep.map(x => {
@@ -135,14 +141,14 @@ object DeepLearnCrime extends App {
   recordReader.initialize(new FileSplit(new File(newFile)))
 
   //Second: the RecordReaderDataSetIterator handles conversion to DataSet objects, ready for use in neural network
-  var labelIndex = 5;     //9 values in each row of the iris.txt CSV: 8 input features followed by an integer label (class) index. Labels are the 5th value (index 4) in each row
-  var numClasses = 26;     //26 classes (types of iris flowers) in the iris data set. Classes have integer values 0, 1 or 2
-  var batchSize = 100000;    //Using a batch size
+  var labelIndex = 5;
+  var numClasses = fbiToKeepArr.length;
+  var batchSize = 50000;    //Using a batch size
 
   var iterator = new RecordReaderDataSetIterator(recordReader,batchSize,labelIndex,numClasses);
   var allData = iterator.next();
   allData.shuffle();
-  var testAndTrain = allData.splitTestAndTrain(0.8);  //Use 80% of data for training
+  var testAndTrain = allData.splitTestAndTrain(0.65);  //Use 80% of data for training
 
   var trainingData = testAndTrain.getTrain();
   var testData = testAndTrain.getTest();
@@ -155,12 +161,11 @@ object DeepLearnCrime extends App {
 
 
   var numInputs = 8;
-  var outputNum = 26;
+  var outputNum = numClasses;
   var iterations = 1000;
-  var midNum = 100;
-  var midNum2 = 100;
-  var midNum3 = 20;
-  var midNum4 = 1;
+  var midNum = 50;
+  var midNum2 = 50;
+  var midNum3 = 50;
   var seed = 6;
 
 
