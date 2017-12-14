@@ -15,5 +15,11 @@ lazy val root = (project in file("."))
     libraryDependencies += "org.apache.spark" % "spark-graphx_2.11" % "2.2.0",
     libraryDependencies += "org.nd4j" % "nd4j-native-platform" % "0.9.1",
     libraryDependencies += "org.deeplearning4j" % "deeplearning4j-core" % "0.9.1",
-    libraryDependencies += "org.deeplearning4j" % "dl4j-spark_2.11" % "0.9.1_spark_2"
+    libraryDependencies += "org.deeplearning4j" % "dl4j-spark_2.11" % "0.9.1_spark_2",
+    libraryDependencies += "com.twelvemonkeys.imageio" % "imageio-core" % "3.1.2",
+    libraryDependencies += "com.twelvemonkeys.common" % "common-lang" % "3.1.2",
+    libraryDependencies += "org.nd4j" % "nd4j-native-platform" % "0.9.1",
+    libraryDependencies += "org.deeplearning4j" % "dl4j-spark_2.11" % "0.9.1_spark_2",
+
+
   )
